@@ -1,34 +1,23 @@
-services:
-  ollama:
-    volumes:
-      - ollama:/root/.ollama
-    container_name: ollama
-    pull_policy: always
-    tty: true
-    restart: unless-stopped
-    image: ollama/ollama:${OLLAMA_DOCKER_TAG-latest}
+version: '3.8'
 
+services:
   open-webui:
-    build:
-      context: .
-      args:
-        OLLAMA_BASE_URL: '/ollama'
-      dockerfile: Dockerfile
-    image: ghcr.io/open-webui/open-webui:${WEBUI_DOCKER_TAG-main}
+    image: ghcr.io/open-webui/open-webui:latest
     container_name: open-webui
     volumes:
-      - open-webui:/app/backend/data
-    depends_on:
-      - ollama
+      - ./data:/app/backend/data
     ports:
-      - ${OPEN_WEBUI_PORT-3000}:8080
+      - "8080:8080"
     environment:
-      - 'OLLAMA_BASE_URL=http://ollama:11434'
-      - 'WEBUI_SECRET_KEY='
+      - OLLAMA_API_BASE_URL=http://host.docker.internal:11434
+      - DATABASE_URL=sqlite:///app/backend/data/open-webui.db
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    networks:
+      - open-webui-net
     extra_hosts:
-      - host.docker.internal:host-gateway
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
 
-volumes:
-  ollama: {}
-  open-webui: {}
+networks:
+  open-webui-net:
+    driver: bridge

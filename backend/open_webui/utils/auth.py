@@ -1,6 +1,6 @@
 import logging
 import uuid
-import jwt
+import jwt  # Ensure this is from PyJWT
 
 from datetime import datetime, timedelta
 from typing import Optional, Union, List, Dict
